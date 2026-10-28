@@ -36,6 +36,22 @@ testRule({
       code: "a { --foo: 1px; }"
     },
     {
+      code: "a { --foo: { color: red; }; }",
+      description: "custom property set"
+    },
+    {
+      code: "a { color: calc(1px + 1s) + 1px; }",
+      description: "Sass operator outside a math function"
+    },
+    {
+      code: "a { transform: TRANSLATEX(10px); }",
+      description: "uppercase camelCase function"
+    },
+    {
+      code: "@function RGB($a) { @return $a; } a { color: RGB(1); }",
+      description: "declared function shadowing a CSS function"
+    },
+    {
       code: "a { color: lightgrey; }"
     },
     {
@@ -825,6 +841,15 @@ testRule({
       endColumn: 30
     },
     {
+      code: "a { width: calc(1px + 2px)); }",
+      description: "parse error next to a math function",
+      message: messages.rejectedParseError("width", "calc(1px + 2px))"),
+      line: 1,
+      column: 12,
+      endLine: 1,
+      endColumn: 28
+    },
+    {
       code: `
         a {
           color: red;
@@ -839,7 +864,6 @@ testRule({
       endLine: 5,
       endColumn: 22
     },
-    /* Not supported.
     {
       code: stripIndent`
 				a { --foo: 10px; }
@@ -855,7 +879,67 @@ testRule({
       endLine: 1,
       endColumn: 16
     },
-    */
+    {
+      code: stripIndent`
+				a { --foo: calc(1px + 1s); }
+				@property --foo {
+					syntax: "<color>";
+					inherits: false;
+					initial-value: #c0ffee;
+				}
+			`,
+      description: "unsolvable math function for a typed custom property",
+      message: messages.rejected("--foo", "calc(1px + 1s)"),
+      line: 1,
+      column: 12,
+      endLine: 1,
+      endColumn: 26
+    },
+    {
+      code: "a { color: calc(1px + 1s); }",
+      description: "unsolvable math function",
+      message: messages.rejected("color", "calc(1px + 1s)"),
+      line: 1,
+      column: 12,
+      endLine: 1,
+      endColumn: 26
+    },
+    {
+      code: "a { color: CALC(1px + 1s); }",
+      description: "uppercase math function",
+      message: messages.rejected("color", "CALC(1px + 1s)"),
+      line: 1,
+      column: 12,
+      endLine: 1,
+      endColumn: 26
+    },
+    {
+      code: "a { color: RGB(0 0 0 0 0); }",
+      description: "uppercase function",
+      message: messages.rejected("color", "RGB(0 0 0 0 0)"),
+      line: 1,
+      column: 12,
+      endLine: 1,
+      endColumn: 26
+    },
+    {
+      code: "a { transform: TRANSLATEX(red); }",
+      description: "uppercase camelCase function",
+      message: messages.rejected("transform", "TRANSLATEX(red)"),
+      line: 1,
+      column: 16,
+      endLine: 1,
+      endColumn: 31
+    },
+    {
+      code: "a { transform: translateX(red); }",
+      description: "camelCase function",
+      message: messages.rejected("transform", "translateX(red)"),
+      line: 1,
+      column: 16,
+      endLine: 1,
+      endColumn: 31
+    },
     {
       code: 'a { font-family: "Foo" serif; }',
       message: messages.rejected("font-family", "serif"),

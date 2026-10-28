@@ -1,6 +1,6 @@
 import { isBoolean, isRegExp, isString } from "../../utils/validateTypes.js";
 import hasInterpolation from "../../utils/hasInterpolation.js";
-import isCustomPropertySet from "../../utils/isCustomPropertySet.js";
+import isCustomProperty from "../../utils/isCustomProperty.js";
 import isStandardSyntaxDeclaration from "../../utils/isStandardSyntaxDeclaration.js";
 import isStandardSyntaxProperty from "../../utils/isStandardSyntaxProperty.js";
 import isType from "../../utils/isType.js";
@@ -67,8 +67,7 @@ function rule(primary, secondaryOptions) {
       if (
         !isStandardSyntaxProperty(prop) ||
         !isStandardSyntaxDeclaration(decl) ||
-        isCustomPropertySet(prop) ||
-        prop.startsWith("--") ||
+        isCustomProperty(prop) ||
         hasInterpolation(prop) ||
         (!shouldCheckPrefixed && vendorPrefix(prop)) ||
         optionsMatches(secondaryOptions, "ignoreProperties", prop)
